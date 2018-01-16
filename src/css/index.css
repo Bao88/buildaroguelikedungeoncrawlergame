@@ -1,0 +1,78 @@
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Joti One', cursive;
+  height: 100%;
+  width: 100%;
+  background: url("http://www.guoguiyan.com/data/out/81/68403830-free-thief-game-wallpapers.jpeg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  /* border: 1px solid red; */
+}
+
+.title {
+  text-align: center;
+  text-shadow: 2px 2px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.statuses{
+  border: 1px solid black;
+  width: 80vw;
+  margin-bottom: 1vh;
+  border-radius: 10px 10px;
+  /* text-align: center; */
+}
+
+.gameWindow {
+  border: 20px solid black;
+  width: 1000px;
+  height: 700px;
+  border-radius: 10px 10px;
+  background: rgba(0, 0, 0, 0.8);
+  overflow: scroll;
+  /* overflow-x: hidden; */
+  
+  /* flex-direction: column; */
+  /* z-index: 1; */
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+.cell {
+  /* border: 1px solid grey; */
+  background-color:white; 
+  width: 10px;
+  height: 10px;
+  margin: 0;
+}
+
+.game {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  /* width: 1200px; */
+  /* height: 1000px; */
+  width: 1000px;
+  height: 700px;
+  
+  left: 50%;
+  /* margin-left: -600px; */
+  margin-left: -500px;
+  /* z-index: 0; */
+}
