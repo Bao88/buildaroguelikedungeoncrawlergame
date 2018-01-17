@@ -39,10 +39,10 @@ body {
 .gameWindow {
   border: 20px solid black;
   width: 1000px;
-  height: 700px;
+  height: 600px;
   border-radius: 10px 10px;
   background: rgba(0, 0, 0, 0.8);
-  overflow: scroll;
+  /* overflow: scroll; */
   /* overflow-x: hidden; */
   
   /* flex-direction: column; */
@@ -69,7 +69,7 @@ body {
   /* width: 1200px; */
   /* height: 1000px; */
   width: 1000px;
-  height: 700px;
+  height: 600px;
   
   left: 50%;
   /* margin-left: -600px; */
