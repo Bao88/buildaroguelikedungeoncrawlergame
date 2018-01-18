@@ -36,26 +36,49 @@ class Main extends React.Component {
     constructor(props){
         super(props);
 
+        this.state = this.Initialstate;
+
+    }
+
+    get Initialstate() {
         var cells = [], cell = [], xLen = 100, yLen = 60;
         while(yLen--){
             while(xLen--) cell[xLen] = [true, false, false, false, false, false, true];
             cells[yLen] = cell.slice();
             xLen = 100;
         }
-        this.state = {
+
+        return {
+            health: -1,
+            level: 1,
+            weapon: 10,
             board: cells,
             emptyBoard: cells.slice(),
-            dungeon: null,
+            dungeon: cells.slice(),
             elements: [1, 5, 5, 1, 1],
             x: 100,
             y: 60,
-            playerPosition: {x: 0, y: 0}
+            playerPosition: {x: 0, y: 0},
+            monsters: [],
+            items: [],
+            weapons: [],
+            boss: {hp: 100, lvl: 1, attack: 10},
+            lvlDungeon: 1
         };
+    }
 
+    resetMap = (bool) => {
+        if(bool){
+
+        } else {
+            this.setState(this.Initialstate);
+            this.setState({dungeon: this.createMap(10), lvlDungeon: this.state.lvlDungeon});
+        }
     }
 
     componentDidMount = () => {
-        this.setState({dungeon: this.createMap(20)});
+        
+        this.setState({dungeon: this.createMap(10)});
     }
     createRoom(map, position, sizeX, sizeY){
         map[position.y][position.x] = [false, false, false, false, false, false, false];;
@@ -83,17 +106,41 @@ class Main extends React.Component {
         return pos;
     }
 
+    // Monsters i = 1, items i = 2 and weapons i = 3
+        createEntities = () => {
+            var array = this.state.elements.slice();
+            var current = 0;
+            for(var i = 1; i < array.length-1; i++){
+                var tmp = [];
+                current = array[i];
+                // console.log(current);
+                while(current > 0){
+                    // if(i === 1) tmp.push({hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1), position: arr.pop()});
+                    // else if(i === 2) tmp.push({heal: Math.floor(Math.random() * 20 + 10), position: arr.pop()});
+                    // else if(i === 3) tmp.push({attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), position: arr.pop()});
+                    // else arr.pop();
+                    if(i === 1) tmp.push({hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1)});
+                    else if(i === 2) tmp.push({heal: Math.floor(Math.random() * 20 + 10)});
+                    else if(i === 3) tmp.push({attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5)});
+                    current--;
+                }
+                if(i === 1) this.setState({monsters: tmp});
+                if(i === 2) this.setState({items: tmp});
+                if(i === 3) this.setState({weapons: tmp});
+            }
+            
+        }
     // myPosition = {};
     // To many states to handle at the same time?
     populateDungeon(map){
         var array = this.state.elements.slice();
         var occupied = [], current = 0, tmp = {};
         var elem = {
-            0: [false, true, false, false, false, false, true],
-            1: [false, false, true, false, false, false, true],
-            2: [false, false, false, true, false, false, true],
-            3: [false, false, false, false, true, false, true],
-            4: [false, false, false, false, false, true, true]
+            0: [false, true, false, false, false, false, true], //player
+            1: [false, false, true, false, false, false, true], //monster
+            2: [false, false, false, true, false, false, false], //items
+            3: [false, false, false, false, true, false, false], //weapons
+            4: [false, false, false, false, false, true, true]  //boss
         };
 
         for(var i = 0; i < array.length; i++){
@@ -108,7 +155,7 @@ class Main extends React.Component {
                 }
             }
         }
-        // return occupied[0];
+        this.createEntities(occupied);
     }
     // Create bindings/tunnels to each room
     createRoad(map, position1, position2){
@@ -148,6 +195,44 @@ class Main extends React.Component {
         tmp[position.posY][position.posX] = state;
         this.setState({dungeon: tmp, playerPosition: position});
     }
+
+    entitiesInteraction = (entity) => {
+        //    wall, player, monster, items, weapon, boss occupied
+        // 1: [false, false, true, false, false, false, true],
+        // 2: [false, false, false, true, false, false, true],
+        // 3: [false, false, false, false, true, false, true],
+        // 4: [false, false, false, false, false, true, true]
+        // console.log("monster " + this.state.monsters[0].position);
+        // console.log("items " + this.state.items[0].position);
+        // console.log("weapon " + this.state.weapons[0].position.posY);
+        // console.log("boss " + this.state.boss.hp + this.state.boss.lvl + this.state.boss.attack);
+
+        var tmp = [], map = this.state.dungeon;
+        if(this.state.dungeon[entity.posY][entity.posX][2]){
+            
+            tmp = this.state.monsters[this.state.monsters.length-1];
+            tmp.hp -= this.state.weapon;
+            this.setState({health: this.state.health - tmp.lvl});
+            // dead monster
+            if(tmp.hp <= 0){
+                this.state.monsters.pop();
+                this.updateMap(entity, [false, true, false, false, false, false, true]);
+            }
+        } else if(this.state.dungeon[entity.posY][entity.posX][3]){
+            tmp = this.state.items.pop();
+            this.setState({health: this.state.health + tmp.heal});
+        } else if(this.state.dungeon[entity.posY][entity.posX][4]){
+            tmp = this.state.weapons.pop();
+            this.setState({weapon: this.state.weapon + tmp.attack});
+            // console.log("weapon");
+        } else if(this.state.dungeon[entity.posY][entity.posX][5]){
+            console.log("boss");
+        }
+
+        if(this.state.health <= 0){
+            this.resetMap(false);
+        }
+    }
 // Movement and interaction
     press = (event) => {
         event.preventDefault();
@@ -174,8 +259,10 @@ class Main extends React.Component {
             // console.log(this.state.dungeon[move.y][move.x]);
             if(!this.state.dungeon[move.posY][move.posX][0]){
                 // console.log("free willy");
-                this.updateMap(move, [false, true, false, false, false, false, true]);
-                
+                this.entitiesInteraction(move);
+                if(!this.state.dungeon[move.posY][move.posX][6]){
+                    this.updateMap(move, [false, true, false, false, false, false, true]);
+                }
                 // this.state.dungeon[move.y][move.x] = [false, true, false, false, false, false, true]
             }
         }
@@ -185,17 +272,17 @@ class Main extends React.Component {
         console.log("Hello");
     }
     render(){
-        var dungeon = this.state.emptyBoard;
+        // var dungeon = this.state.dungeon;
         return (
             <div className="main" onKeyDown={this.press} tabIndex="0">
                 <div className="statuses">
-                    Health Level Weapon
+                    Health: {this.state.health} Level: {this.state.level} Weapon: {this.state.weapon} Dungeon: {this.state.lvlDungeon}
                 </div>
                 <div className="gameWindow">
                     <div className="game">
                         {
-                           dungeon.map((value, index) => (
-                                dungeon[index].map((value, inx) => (
+                           this.state.dungeon.map((value, index) => (
+                                this.state.dungeon[index].map((value, inx) => (
                                     <Cell key={index + "," + inx} x={index} y={inx} id={"x: " +index + " y: " + inx} arr={value} onClick={this.change}/>
                                 ), this)
                             ), this)
