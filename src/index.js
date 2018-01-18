@@ -172,10 +172,10 @@ class Main extends React.Component {
             // console.log(move);
             // test whether the new cell is occupied
             // console.log(this.state.dungeon[move.y][move.x]);
-            if(!this.state.dungeon[move.posY][move.posX][6]){
+            if(!this.state.dungeon[move.posY][move.posX][0]){
                 // console.log("free willy");
                 this.updateMap(move, [false, true, false, false, false, false, true]);
-
+                
                 // this.state.dungeon[move.y][move.x] = [false, true, false, false, false, false, true]
             }
         }
@@ -200,6 +200,7 @@ class Main extends React.Component {
                                 ), this)
                             ), this)
                         }
+                        {/* {dungeon} */}
                     </div>
                 </div>
             </div>
