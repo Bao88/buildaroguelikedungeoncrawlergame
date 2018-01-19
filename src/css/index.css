@@ -30,7 +30,7 @@ body {
 }
 
 .statuses{
-  border: 1px solid black;
+  /* border: 1px solid black; */
   width: 80vw;
   margin-bottom: 1vh;
   border-radius: 10px 10px;
@@ -48,11 +48,6 @@ body {
   
   /* flex-direction: column; */
   /* z-index: 1; */
-}
-
-::-webkit-scrollbar {
-  width: 0;
-  background: transparent;
 }
 
 .cell {
@@ -76,4 +71,14 @@ body {
   /* margin-left: -600px; */
   margin-left: -500px;
   /* z-index: 0; */
+}
+
+
+.fog {
+  position: absolute;
+  background: black;
+  
+  width: 10px;
+  height: 10px;
+  margin: 0;
 }
