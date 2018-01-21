@@ -40,7 +40,7 @@ render() {
 }
 
 var gRooms = 10;
-// var fog = false;
+var fog = true;
 // Should optimize the program, takes too much CPU resources
 class Main extends React.Component {
     constructor(props){
@@ -55,7 +55,7 @@ class Main extends React.Component {
         // var fogs = [], fog = [];
         while(yLen--){
             while(xLen--){
-                cell[xLen] = [true, false, false, false, false, false, true, false];
+                cell[xLen] = [true, false, false, false, false, false, true, fog];
                 // fog[xLen] = false;
             }
             cells[yLen] = cell.slice();
@@ -82,7 +82,7 @@ class Main extends React.Component {
             weapons: [],
             boss: {hp: 100, lvl: 1, attack: 5},
             lvlDungeon: 1,
-            fog: false
+            tfog: fog
         };
     }
 
@@ -133,12 +133,12 @@ class Main extends React.Component {
 
     }
     createRoom(map, position, sizeX, sizeY){
-        map[position.y][position.x] = [false, false, false, false, false, false, false, this.state.fog];
+        map[position.y][position.x] = [false, false, false, false, false, false, false, this.state.tfog];
 
         for(var x = 0; x <= sizeX; x++){
-            map[position.y][position.x+x] = [false, false, false, false, false, false, false, this.state.fog];
+            map[position.y][position.x+x] = [false, false, false, false, false, false, false, this.state.tfog];
             for(var y = 0; y <= sizeY; y++){
-                map[position.y+y][position.x+x] = [false, false, false, false, false, false, false, this.state.fog];
+                map[position.y+y][position.x+x] = [false, false, false, false, false, false, false, this.state.tfog];
             }
         }
 
@@ -189,11 +189,11 @@ class Main extends React.Component {
         var array = this.state.elements.slice();
         var occupied = [], current = 0, tmp = {};
         var elem = {
-            0: [false, true, false, false, false, false, true, this.state.fog], //player
-            1: [false, false, true, false, false, false, true, this.state.fog], //monster
-            2: [false, false, false, true, false, false, false, this.state.fog], //items
-            3: [false, false, false, false, true, false, false, this.state.fog], //weapons
-            4: [false, false, false, false, false, true, true, this.state.fog]  //boss
+            0: [false, true, false, false, false, false, true, false], //player
+            1: [false, false, true, false, false, false, true, this.state.tfog], //monster
+            2: [false, false, false, true, false, false, false, this.state.tfog], //items
+            3: [false, false, false, false, true, false, false, this.state.tfog], //weapons
+            4: [false, false, false, false, false, true, true, this.state.tfog]  //boss
         };
 
         for(var i = 0; i < array.length; i++){
@@ -203,7 +203,7 @@ class Main extends React.Component {
                 if(!occupied.includes(tmp)){
                     occupied.push(tmp);
                     map[tmp.posY][tmp.posX] = elem[i];
-                    if(i === 0) this.setState({playerPosition: tmp});
+                    if(i === 0) this.setState({playerPosition: tmp}, function(){this.updateFog(this.state.playerPosition);});
                     current--;
                 }
             }
@@ -216,12 +216,12 @@ class Main extends React.Component {
         var y1 = position1.y, y2 = position2.y;
 
         while(x1 !== x2){
-            map[position1.y][x1] = [false, false, false, false, false, false, false, this.state.fog];
+            map[position1.y][x1] = [false, false, false, false, false, false, false, this.state.tfog];
             x1 = x1 < x2 ? x1 + 1 : x1 - 1;
         }
 
         while(y1 !== y2){
-            map[y1][position2.x] = [false, false, false, false, false, false, false, this.state.fog];
+            map[y1][position2.x] = [false, false, false, false, false, false, false, this.state.tfog];
             y1 = y1 < y2 ? y1 + 1 : y1 - 1;
         }
     }
@@ -233,23 +233,35 @@ class Main extends React.Component {
 
         while(loop--){
             let sizeX = Math.floor(Math.random() * 15 + 1), sizeY = Math.floor(Math.random() * 15 + 1);
-            let position = {x: Math.floor(Math.random() * 84 + 1), y: Math.floor(Math.random() * 43 + 1)}; // dont start around corners
+            let position = {x: Math.floor(Math.random() * 84 + 2), y: Math.floor(Math.random() * 43 + 2)}; // dont start around corners
             positionsArray.push(position);
             this.createRoom(map, position, sizeX, sizeY);
         }
         while(rooms-- !== 1) this.createRoad(map, positionsArray[rooms], positionsArray[rooms-1]);
         this.populateDungeon(map);
+        // this.updateFog(this.state.playerPosition);
         return map;
     };
 
     // update the area revealed
     updateFog = (position) => {
-        var tmp = this.state.fogofwar;
-        tmp[position.posY-1][position.poX] = true;
-        tmp[position.posY+1][position.poX] = true;
-        tmp[position.posY][position.poX-1] = true;
-        tmp[position.posY][position.poX+1] = true;
-        this.setState({fogofwar: tmp});
+        var tmp = this.state.dungeon;
+        // // console.log(position);
+        // // console.log(position);
+        tmp[position.posY-2][position.posX][7] = false;
+        tmp[position.posY-1][position.posX][7] = false;
+        tmp[position.posY+1][position.posX][7] = false;
+        tmp[position.posY+2][position.posX][7] = false;
+        tmp[position.posY][position.posX-1][7] = false;
+        tmp[position.posY][position.posX+1][7] = false;
+        tmp[position.posY][position.posX-2][7] = false;
+        tmp[position.posY][position.posX+2][7] = false;
+        tmp[position.posY-1][position.posX-1][7] = false;
+        tmp[position.posY-1][position.posX+1][7] = false;
+        tmp[position.posY+1][position.posX+1][7] = false;
+        tmp[position.posY+1][position.posX-1][7] = false;
+
+        this.setState({dungeon: tmp});
     }
 
     // Move the player around and update the entity we collide with
@@ -259,8 +271,7 @@ class Main extends React.Component {
         tmp[player.posY][player.posX] = [false, false, false, false, false, false, false, this.state.fog];
         tmp[position.posY][position.posX] = state;
         
-        this.setState({dungeon: tmp, playerPosition: position});
-
+        this.setState({dungeon: tmp, playerPosition: position}, function(){this.updateFog(this.state.playerPosition);});
     }
 
     entitiesInteraction = (entity) => {
@@ -303,7 +314,7 @@ class Main extends React.Component {
                 this.setState({exp: this.state.exp + tmp.lvl * Math.floor(Math.random()*5 + 5)});
                 if(this.state.exp >= this.state.expcap) this.setState({health: this.state.health + 10*this.state.level, weapon: this.state.weapon + this.state.level, level: this.state.level+1, exp: this.state.exp-this.state.expcap, expcap: this.state.expcap + this.state.lvlDungeon},
                     function(){
-                        this.updateMap(entity, [false, true, false, false, false, false, true]);
+                        // this.updateMap(entity, [false, true, false, false, false, false, true]);
                         if(this.state.health > 0){
                             this.resetMap(true);
                         }
@@ -352,13 +363,12 @@ class Main extends React.Component {
     }
 
     change = (event) => {
-        console.log("Hello");
     }
     render(){
         return (
             <div className="main" onKeyDown={this.press} tabIndex="0">
                 <div className="statuses">
-                    Health: {this.state.health} Level: {this.state.level} EXP: {this.state.exp} Weapon: {this.state.weapon} Dungeon: {this.state.lvlDungeon}
+                    Health: {this.state.health} Level: {this.state.level} EXP: {this.state.exp} Weapon: {this.state.weapon} Dungeon: {this.state.lvlDungeon} <button onClick={this.change}>Toggle Darkness</button>
                 </div>
                 <div className="gameWindow">
                         
@@ -366,7 +376,7 @@ class Main extends React.Component {
                         {
                            this.state.dungeon.map((value, index) => (
                                 this.state.dungeon[index].map((value, inx) => (
-                                        <Cell key={index + "," + inx} x={index} y={inx} id={"x: " +index + " y: " + inx} arr={value} onClick={this.change}/>
+                                        <Cell key={index + "," + inx} x={index} y={inx} id={"x: " +index + " y: " + inx} arr={value}/>
                                 ), this)
                             ), this)
                         }
