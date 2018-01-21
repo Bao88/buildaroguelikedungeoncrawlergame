@@ -23,16 +23,22 @@ class Cell extends React.Component{
             items: false,
             weapon: false,
             boss: false,
-            occupied: false
+            occupied: false,
+            fog: this.props.arr[7]
         };
     }
 
     change = (event) => {
         this.setState({wall: !this.state.wall});
     }
+
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     return this.state.wall != nextState.wall;
+    // }
+
 render() {
         return (
-            <div id={this.props.id} onClick={this.change} className="cell" style={{backgroundColor: this.props.arr[7] ? "black" : this.props.arr[0] ? "grey" : (this.props.arr[1] ? "red": (this.props.arr[2] ? "green": (this.props.arr[3] ? "purple": (this.props.arr[4] ? "yellow" : (this.props.arr[5] ? "blue":"white")))))}}>
+            <div id={this.props.id} onClick={this.change} className="cell" style={{backgroundColor: this.state.fog ? "black" : this.props.arr[0] ? "grey" : (this.props.arr[1] ? "red": (this.props.arr[2] ? "green": (this.props.arr[3] ? "purple": (this.props.arr[4] ? "yellow" : (this.props.arr[5] ? "blue":"white")))))}}>
 
             </div>
         )
@@ -40,7 +46,7 @@ render() {
 }
 
 var gRooms = 10;
-var fog = true;
+var fog = false;
 // Should optimize the program, takes too much CPU resources
 class Main extends React.Component {
     constructor(props){
