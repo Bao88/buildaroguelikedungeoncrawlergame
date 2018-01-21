@@ -363,6 +363,14 @@ class Main extends React.Component {
     }
 
     change = (event) => {
+        fog = !fog;
+        var tmp = this.state.dungeon;
+        for(var x = 0; x < tmp.length; x++){
+            for(var y = 0; y < tmp[x].length; y++){
+                tmp[x][y][7] = !fog;
+            }
+        }
+        this.setState({dungeon: tmp}, function() {this.updateFog(this.state.playerPosition);});
     }
     render(){
         return (
