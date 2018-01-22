@@ -37,17 +37,13 @@ export class Cell extends React.Component {
         this.setState({entity: type, health: hp, attack: att});
     }
 
-    fog() {
+    fog(bool) {
         if(this.state.entity === "red");
-        else if(this.state.fog) this.setState({ fog: !this.state.fog });
+        else this.setState({ fog: bool });
     }
 
     shouldComponentUpdate(prevProps, prevState){
         return prevState !== this.state.fog;
-    }
-
-    componentDidUpdate(){
-        // console.log("Updated");
     }
 
     render() {

@@ -6,7 +6,7 @@ import { Cell } from "./scripts/entities";
 
 
 // Game Configurations
-var gRooms = 10, cells = [];
+var gRooms = 10, cells = [], fog = false;
 // var fog = true;
 var yLength = 60, xLength = 100;
 var totalEntities = {
@@ -213,7 +213,6 @@ class Main extends React.Component {
        
         if (health <= 0) {
             console.log("resetmap");
-            // this.resetMap(false);
         }
         return false;
     }
@@ -221,42 +220,30 @@ class Main extends React.Component {
     press = (event) => {
         event.preventDefault();
         var position = parseInt(playerPosition, 10);
-        // console.log(React.Children.count(this.props.children));
+
         var key = event.which;
         var move = null;
-        if (key === 37) {
-            // console.log("left");
-            move = position-1;
-        } else if (key === 38) {
-            // console.log("up");
-            move = position-xLength;
-        } else if (key === 39) {
-            move = position + 1;
-            // console.log("right");
-        } else if (key === 40) {
-            // console.log("down");
-            move = position+xLength;
-        }
-
-        // console.log(document.getElementById("hp").innerHTML);
+        if (key === 37) move = position-1;
+        else if (key === 38) move = position-xLength;
+        else if (key === 39) move = position + 1;
+        else if (key === 40) move = position+xLength;
+        
         if(move){
-            // console.log(this.refs[move].checkEntity);
             if(this.refs[move].checkEntity() !== "grey"){
                 if(this.entitiesInteraction(move) || this.refs[move].checkEntity() === "white"){
-
                     this.refs[move].setEntity("red");
                     this.refs[playerPosition].setEntity("white");
-
                     this.updateFog(move);
                 }
             }
         }
     }
 
-
-    change = (event) => {
-        var len = 100 * 60;
-        while (len--) this.refs[len].fog();
+    toggleFogofWar = () => {
+        var len = xLength * yLength;
+        while (len--) this.refs[len].fog(fog);
+        fog = !fog;
+        this.updateFog(playerPosition);
     }
 
     renderCreate(length){
@@ -304,7 +291,7 @@ class Main extends React.Component {
         return (
             <div className="main" onKeyDown={this.press} tabIndex="0">
                 <div className="statuses" ref="stats">
-                    <button onClick={this.reset}>Reset</button> Health: <span id="hp">{health}</span> Level: <span id="lvl">{level}</span> EXP: <span id="xp">{exp}</span> Weapon: <span id="wp">{weapon}</span> Dungeon: <span id="dng">{dungeon}</span> <button onClick={this.change}>Toggle Darkness</button>
+                    <button onClick={this.reset}>Reset</button> Health: <span id="hp">{health}</span> Level: <span id="lvl">{level}</span> EXP: <span id="xp">{exp}</span> Weapon: <span id="wp">{weapon}</span> Dungeon: <span id="dng">{dungeon}</span> <button onClick={this.toggleFogofWar}>Toggle Fog Of War</button>
                 </div>
                 <div className="gameWindow">
 
