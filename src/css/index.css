@@ -14,7 +14,6 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  /* border: 1px solid red; */
 }
 
 .title {
@@ -30,7 +29,6 @@ body {
 }
 
 .statuses{
-  /* border: 1px solid black; */
   width: 80vw;
   margin-bottom: 1vh;
   border-radius: 10px 10px;
@@ -43,15 +41,9 @@ body {
   height: 600px;
   border-radius: 10px 10px;
   background: rgba(0, 0, 0, 0.8);
-  /* overflow: scroll; */
-  /* overflow-x: hidden; */
-  
-  /* flex-direction: column; */
-  /* z-index: 1; */
 }
 
 .cell {
-  /* border: 1px solid grey; */
   background-color:white; 
   width: 10px;
   height: 10px;
@@ -62,22 +54,16 @@ body {
   position: relative;
   display: flex;
   flex-wrap: wrap;
-  /* width: 1200px; */
-  /* height: 1000px; */
   width: 1000px;
   height: 600px;
-  
   left: 50%;
-  /* margin-left: -600px; */
   margin-left: -500px;
-  /* z-index: 0; */
 }
 
 
 .fog {
   position: absolute;
   background: black;
-  
   width: 10px;
   height: 10px;
   margin: 0;
