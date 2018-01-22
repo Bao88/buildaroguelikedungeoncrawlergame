@@ -4,6 +4,7 @@ import './css/index.css';
 // import { Monster, Items, Weapons, Player, Boss, Wall, Road, Cell } from "./scripts/entities";
 import { Cell } from "./scripts/entities";
 
+
 // Game Configurations
 var gRooms = 10, cells = [];
 // var fog = true;
@@ -19,13 +20,19 @@ var totalEntities = {
 
 // Dungeon and player informaiton
 var expcap = 10, playerPosition = 0;
-var health = 50, level = 1, exp = 0, weapon = 5, dungeon = 1;
+var health = 50, level = 1, exp = 0, weapon = 2, dungeon = 1;
 
 // Should optimize the program, takes too much CPU resources
 class Main extends React.Component {
-    state = {
-        dungeon: []
+    constructor(props){
+        super(props);
+        this.state = this.Initialstate;
     }
+
+    get Initialstate(){
+        return {dungeon: []};
+    }
+
     resetMap = (bool) => {
         if (this.state.lvlDungeon === 20) {
             this.setState(this.Initialstate, function validate() {
@@ -80,32 +87,6 @@ class Main extends React.Component {
         }
     }
 
-    
-    // createEntities = () => {
-    //     var array = this.state.elements.slice();
-    //     var current = 0;
-    //     for (var i = 1; i < array.length; i++) {
-    //         var tmp = [];
-    //         current = array[i];
-    //         // console.log(current);
-    //         while (current > 0) {
-    //             // if(i === 1) tmp.push({hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1), position: arr.pop()});
-    //             // else if(i === 2) tmp.push({heal: Math.floor(Math.random() * 20 + 10), position: arr.pop()});
-    //             // else if(i === 3) tmp.push({attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), position: arr.pop()});
-    //             // else arr.pop();
-    //             if (i === 1) tmp.push({ hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1) });
-    //             else if (i === 2) tmp.push({ heal: Math.floor(Math.random() * 20 + 10) });
-    //             else if (i === 3) tmp.push({ attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5) });
-    //             else if (i === 4) this.setState({ boss: { hp: 2 * this.state.lvlDungeon, lvl: this.state.lvlDungeon, attack: 2 * this.state.lvlDungeon } })
-    //             current--;
-    //         }
-    //         if (i === 1) this.setState({ monsters: tmp });
-    //         if (i === 2) this.setState({ items: tmp });
-    //         if (i === 3) this.setState({ weapons: tmp });
-    //     }
-
-    // }
-    
     // Get a random vacant location on the map
     getRandomPos(available) {
         return available.splice(Math.floor(Math.random() * available.length), 1);
@@ -124,8 +105,6 @@ class Main extends React.Component {
             // console.log(keys[i]);
             for(var y = 0; y < totalEntities[keys[i]]; y++){
                 var pos =  available.splice(Math.floor(Math.random() * available.length), 1);
-                // this.refs[currentPos].setEntity(keys[i]);
-                // occupied.push(current);
                 if(keys[i] === "red"){
                     this.refs[pos].setEntity(keys[i], 0, 0);             //player
                     this.refs[pos].fog();
@@ -133,31 +112,12 @@ class Main extends React.Component {
                     
                 }
                 else if(keys[i] === "green") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 5),  Math.floor(Math.random() * dungeon + 5));      //monsters
-                else if(keys[i] === "blue") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 20),  Math.floor(Math.random() * dungeon + 10));       //boss
+                else if(keys[i] === "blue") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 10),  Math.floor(Math.random() * dungeon + 10));       //boss
                 else if(keys[i] === "yellow") this.refs[pos].setEntity(keys[i], 0, Math.floor(Math.random() * dungeon + 3));     //weapons
                 else if(keys[i] === "purple") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 20), 0);     //items
             }
         }
        
-        // for(var p = 0; p < 6000; p++){
-        //     if(this.refs[p].getVacancy() === "white") console.log("white");
-        
-        // }
-
-        // console.log("Hello");
-        // for (var i = 0; i < array.length; i++) {
-        //     current = array[i];
-        //     while (current > 0) {
-        //         tmp = this.getRandomPos();
-        //         if (!occupied.includes(tmp)) {
-        //             occupied.push(tmp);
-        //             map[tmp.posY][tmp.posX] = elem[i];
-        //             if (i === 0) this.setState({ playerPosition: tmp }, function () { this.updateFog(this.state.playerPosition); });
-        //             current--;
-        //         }
-        //     }
-        // }
-        // this.createEntities(occupied);
     }
 
     // Create bindings/tunnels to each room
@@ -189,77 +149,73 @@ class Main extends React.Component {
             this.createRoom(position, sizeX, sizeY, available);
         }
         while (rooms-- !== 1) this.createRoad(positionsArray[rooms], positionsArray[rooms - 1], available);
-        // console.log("Hello 1");
-        
-        // return map;
         this.populateDungeon(available);
-        // this.updateFog(this.state.playerPosition);
-        // return map;
     };
 
     // update the area revealed
-    updateFog(){
-        var position = parseInt(playerPosition, 10);
-        this.refs[position-1].fog();
-        this.refs[position-xLength].fog();
-        this.refs[position+1].fog();
-        this.refs[position+xLength].fog();
-
-        // this.setState({ dungeon: tmp });
+    updateFog(move){
+        var position = parseInt(move, 10);
+        
+        for(var i = -2; i < 3; i++){
+            this.refs[position-2*xLength+i].fog();
+            this.refs[position-xLength+i].fog();
+            this.refs[position-i].fog();
+            this.refs[position+xLength+i].fog();
+            this.refs[position+2*xLength+i].fog();
+        }
+        playerPosition = position;
     }
 
-    // Move the player around and update the entity we collide with
-    updateMap = (position, state) => {
-        var tmp = this.state.dungeon;
-        var player = this.state.playerPosition;
-        tmp[player.posY][player.posX] = [false, false, false, false, false, false, false, this.state.fog];
-        tmp[position.posY][position.posX] = state;
-
-        this.setState({ dungeon: tmp, playerPosition: position }, function () { this.updateFog(this.state.playerPosition); });
+    updateStats(){
+        document.getElementById("hp").innerHTML = health;
+        document.getElementById("wp").innerHTML = weapon;
+        document.getElementById("xp").innerHTML = exp;
+        document.getElementById("lvl").innerHTML = level;
+        document.getElementById("dng").innerHTML = dungeon;
     }
-
     // Interarctions of entities
     entitiesInteraction = (entity) => {
-        var tmp = [], map = this.state.dungeon;
-        var type = this.refs[entity].checkEntity();
-        if(type === "green"){
-            console.log("monster");
-            // return;
-            // dead monster
-            if(tmp.hp <= 0){
-                this.state.monsters.pop();
-                this.setState({ exp: this.state.exp + tmp.lvl * Math.floor(Math.random() * 2 + 1) });
-                if (this.state.exp >= this.state.expcap) this.setState({ health: this.state.health + 10 * this.state.level, weapon: this.state.weapon + this.state.level, level: this.state.level + 1, exp: this.state.exp - this.state.expcap, expcap: this.state.expcap + this.state.lvlDungeon });
-                this.updateMap(entity, [false, true, false, false, false, false, true]);
-            }
-        } else if(type === "green"){
-            tmp = this.state.items.pop();
-            this.setState({ health: this.state.health + tmp.heal });
-        } else if(type === "green"){
-            tmp = this.state.weapons.pop();
-            this.setState({ weapon: this.state.weapon + tmp.attack });
-        } else if(type === "green"){
-            console.log("boss");
-            tmp = this.state.boss;
-            tmp.hp -= this.state.weapon;
-            this.setState({ health: this.state.health - tmp.lvl * tmp.attack });
-            // dead monster
-            if (tmp.hp <= 0) {
-                this.setState({ exp: this.state.exp + tmp.lvl * Math.floor(Math.random() * 5 + 5) });
-                if (this.state.exp >= this.state.expcap) this.setState({ health: this.state.health + 10 * this.state.level, weapon: this.state.weapon + this.state.level, level: this.state.level + 1, exp: this.state.exp - this.state.expcap, expcap: this.state.expcap + this.state.lvlDungeon },
-                    function () {
-                        // this.updateMap(entity, [false, true, false, false, false, false, true]);
-                        if (this.state.health > 0) {
-                            this.resetMap(true);
-                        }
-                    }
-                );
-            }
-        }
+        var type = this.refs[entity].checkEntity(), entityStats = this.refs[entity].getStats();
+        var hp = 0, att = 0;
+        if(type === "green" || type === "blue"){ //monster
+            hp = entityStats.hp - weapon;
+            health -= entityStats.att;
+            this.refs[entity].setEntity(type, hp, entityStats.att);
 
-        if (health <= 0) {
-            this.resetMap(false);
+            document.getElementById("hp").innerHTML = health;
+            if(hp <= 0){
+                console.log("Dead");
+                exp += entityStats.att;
+
+                if(expcap <= exp){   // level up
+                    exp = exp - expcap, health += 50, weapon += 5, level++, expcap += 5*dungeon;
+                    this.updateStats();
+                }
+                document.getElementById("xp").innerHTML = exp;
+
+                if(type === "blue"){
+                    dungeon++;
+                    this.reset();
+                }
+
+                return true;
+            }
+            
+        } else if(type === "purple"){ //items
+            health += entityStats.hp;
+            document.getElementById("hp").innerHTML = health;
+            return true;
+        } else if(type === "yellow"){ //weapons
+            weapon += entityStats.att;
+            document.getElementById("wp").innerHTML = weapon;
+            return true;
         }
+       
+        if (health <= 0) {
+            console.log("resetmap");
+            // this.resetMap(false);
+        }
+        return false;
     }
     // Movement and interaction
     press = (event) => {
@@ -282,17 +238,17 @@ class Main extends React.Component {
             move = position+xLength;
         }
 
-        
+        // console.log(document.getElementById("hp").innerHTML);
         if(move){
             // console.log(this.refs[move].checkEntity);
             if(this.refs[move].checkEntity() !== "grey"){
-                // this.entitiesInteraction(move);
-                this.refs[move].setEntity("red");
-                this.refs[playerPosition].setEntity("white");
+                if(this.entitiesInteraction(move) || this.refs[move].checkEntity() === "white"){
 
-                playerPosition = move;
+                    this.refs[move].setEntity("red");
+                    this.refs[playerPosition].setEntity("white");
 
-                this.updateFog();
+                    this.updateFog(move);
+                }
             }
         }
     }
@@ -303,15 +259,13 @@ class Main extends React.Component {
         while (len--) this.refs[len].fog();
     }
 
-    renderCreate(map){
-        
+    renderCreate(length){
     }
 
     componentDidMount(){
-        // this.updateFog(playerPosition);
-        
-        this.setState({dungeon: cells});
-        console.log(this.refs);
+        // this.setState({dungeon: cells});
+        this.forceUpdate();
+        // console.log(this.refs);
     }
 
     componentDidUpdate(){
@@ -321,36 +275,42 @@ class Main extends React.Component {
         // console.log(playerPosition+1);
         // console.log(this.refs[playerPosition+1]);
         // console.log(this.refs[playerPosition+1].fog());
-        this.updateFog();
+        this.updateFog(playerPosition);
+    }
+
+
+
+    reset=()=>{
+        var length = xLength*yLength;
+        while (length--) this.refs[length].reset();
+        // cells = [];
+        // document.getElementById("gameCells").innerHTML =  "";
+
+        this.forceUpdate();
+        // cells = [];
+        // this.unmountMe();
+        // this.render();
+        
+        // var length = xLength*yLength;
+        // while (length--) cells[length] = <Cell ref={length} key={length} />;
+        // this.setState(this.Initialstate);
     }
 
     render() {
         var length = xLength*yLength;
         // console.log(length);
         while (length--) cells[length] = <Cell ref={length} key={length} />;
-        // this.setState({refArray: cells});
+        // this.setState({dungeon: cells});
         return (
             <div className="main" onKeyDown={this.press} tabIndex="0">
-                <div className="statuses">
-                    Health: {health} Level: {level} EXP: {exp} Weapon: {weapon} Dungeon: {dungeon} <button onClick={this.change}>Toggle Darkness</button>
+                <div className="statuses" ref="stats">
+                    <button onClick={this.reset}>Reset</button> Health: <span id="hp">{health}</span> Level: <span id="lvl">{level}</span> EXP: <span id="xp">{exp}</span> Weapon: <span id="wp">{weapon}</span> Dungeon: <span id="dng">{dungeon}</span> <button onClick={this.change}>Toggle Darkness</button>
                 </div>
                 <div className="gameWindow">
 
-                    <div className="game">
+                    <div id="gameCells" className="game">
                         {cells}
-                        {/* <Monster />
-                        <Items />
-                        <Weapons />
-                        <Player />
-                        <Boss />
-                        <Wall /> */}
-                        {/* {
-                           this.state.dungeon.map((value, index) => (
-                                this.state.dungeon[index].map((value, inx) => (
-                                        <Cell key={index + "," + inx} x={index} y={inx} id={"x: " +index + " y: " + inx} arr={value}/>
-                                ), this)
-                            ), this)
-                        } */}
+                        {/* {this.state.dungeon} */}
                     </div>
                 </div>
             </div>

@@ -4,13 +4,25 @@ export class Cell extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
+        this.state = this.InitialState;
+    }
+
+    get InitialState(){
+        return {
             entity: "grey",
             health: null,
             attack: null,
             exp: null,
             fog: true
         };
+    }
+
+    reset(){
+        this.setState(this.InitialState);
+    }
+
+    getStats(){
+        return {hp: this.state.health, att: this.state.attack};
     }
 
     getVacancy(){
