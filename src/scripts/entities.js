@@ -1,5 +1,64 @@
 import React from "react";
 
+export class Cell extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            entity: "grey",
+            health: null,
+            attack: null,
+            exp: null,
+            fog: true
+        };
+    }
+
+
+    getVacancy(){
+        return this.state.entity;
+    }
+
+    checkEntity() {
+        return this.state.entity;
+    }
+
+
+    // //  if(keys[i] === "red") this.refs[pos].setEntity(keys[i]);             //player
+    // else if(keys[i] === "green") this.refs[pos].setEntity(keys[i]);      //monsters
+    // else if(keys[i] === "blue") this.refs[pos].setEntity(keys[i]);       //boss
+    // else if(keys[i] === "yellow") this.refs[pos].setEntity(keys[i]);     //weapons
+    // else if(keys[i] === "purple") this.refs[pos].setEntity(keys[i]);     //items
+    setEntity(type, hp, att) {
+        // switch(type){
+        //     case "red": this.setState({ entity: type}); break;
+        //     // case "green": this.setState({ entity: type, health: hp, attack: att, level: lvl}); break;
+        //     // case "blue": this.setState({ entity: type, health: hp, attack: att, level: lvl}); break;
+        //     case "purple": this.setState({ entity: type, health: hp, attack: att}); break;
+        //     case "yellow": this.setState({ entity: type, health: hp, attack: att}); break;
+        //     default: this.setState({ entity: type, health: hp, attack: att}); break;
+        // }
+        this.setState({entity: type, health: hp, attack: att});
+    }
+
+    fog() {
+        this.setState({ fog: !this.state.fog });
+    }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     return this.state.wall != nextState.wall;
+    // }
+    componentDidUpdate(){
+        console.log("Updated");
+    }
+
+    render() {
+        return (
+            <div id={this.props.id} className="cell" style={{ backgroundColor: this.state.fog ? "black" : this.state.entity }}>
+
+            </div>
+        )
+    };
+}
+
 export class Monster extends React.Component {
     state = {
         fog: false

@@ -1,59 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './css/index.css';
-import { Monster, Items, Weapons, Player, Boss, Wall, Road } from "./scripts/entities";
-
-class Cell extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            entity: "grey",
-            health: null,
-            attack: null,
-            level: null,
-            exp: null,
-            fog: true
-        };
-    }
-
-
-    getVacancy(){
-        return this.state.entity;
-    }
-
-    checkEntity() {
-        return this.state.entity;
-    }
-
-    setEntity(type) {
-        this.setState({ entity: type });
-    }
-
-    change = (event) => {
-        this.setState({ wall: !this.state.wall });
-    }
-
-    fog() {
-        this.setState({ fog: !this.state.fog });
-    }
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     return this.state.wall != nextState.wall;
-    // }
-
-
-    render() {
-        return (
-            <div id={this.props.id} onClick={this.change} className="cell" style={{ backgroundColor: this.state.entity }}>
-
-            </div>
-        )
-    };
-}
+// import { Monster, Items, Weapons, Player, Boss, Wall, Road, Cell } from "./scripts/entities";
+import { Cell } from "./scripts/entities";
 
 // Game Configurations
 var gRooms = 10;
-var fog = true;
+// var fog = true;
 var yLength = 60, xLength = 100;
 var totalEntities = {
     "red": 1,      //player
@@ -62,48 +15,14 @@ var totalEntities = {
     "yellow": 1,     //weapons
     "blue": 1         //boss
 };
-var expcap = 10;
+
+
+// Dungeon and player informaiton
+var expcap = 10, playerPosition = 0;
+var health = 50, level = 1, exp = 0, weapon = 5, dungeon = 1;
 
 // Should optimize the program, takes too much CPU resources
 class Main extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = this.Initialstate;
-
-    }
-
-    get Initialstate() {
-        var cells = [], fogofwar = [], length = xLength * yLength;
-        // while(length--) refArray = "c";   length = xLength * yLength;
-        while (length--) fogofwar[length] = true; length = xLength * yLength;
-
-        // refArray[0] = "a";
-        // cells[0] = <Wall ref={component => {this["cell${0}"] = component}} key={length} f={fogofwar[0]}/>;
-
-        return {
-            health: 100,
-            level: 1,
-            weapon: 5,
-            exp: 0,
-            expcap: 10,
-            board: cells,
-            emptyBoard: cells.slice(),
-            dungeon: cells,
-            fogs: fogofwar,
-            elements: [1, 5, 5, 1, 1],
-            x: 100,
-            y: 60,
-            playerPosition: { x: 0, y: 0 },
-            monsters: [],
-            items: [],
-            weapons: [],
-            boss: { hp: 100, lvl: 1, attack: 5 },
-            lvlDungeon: 1,
-            fog: true,
-            refArray: []
-        };
-    }
 
     resetMap = (bool) => {
         if (this.state.lvlDungeon === 20) {
@@ -164,30 +83,30 @@ class Main extends React.Component {
     }
 
     
-    createEntities = () => {
-        var array = this.state.elements.slice();
-        var current = 0;
-        for (var i = 1; i < array.length; i++) {
-            var tmp = [];
-            current = array[i];
-            // console.log(current);
-            while (current > 0) {
-                // if(i === 1) tmp.push({hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1), position: arr.pop()});
-                // else if(i === 2) tmp.push({heal: Math.floor(Math.random() * 20 + 10), position: arr.pop()});
-                // else if(i === 3) tmp.push({attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), position: arr.pop()});
-                // else arr.pop();
-                if (i === 1) tmp.push({ hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1) });
-                else if (i === 2) tmp.push({ heal: Math.floor(Math.random() * 20 + 10) });
-                else if (i === 3) tmp.push({ attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5) });
-                else if (i === 4) this.setState({ boss: { hp: 2 * this.state.lvlDungeon, lvl: this.state.lvlDungeon, attack: 2 * this.state.lvlDungeon } })
-                current--;
-            }
-            if (i === 1) this.setState({ monsters: tmp });
-            if (i === 2) this.setState({ items: tmp });
-            if (i === 3) this.setState({ weapons: tmp });
-        }
+    // createEntities = () => {
+    //     var array = this.state.elements.slice();
+    //     var current = 0;
+    //     for (var i = 1; i < array.length; i++) {
+    //         var tmp = [];
+    //         current = array[i];
+    //         // console.log(current);
+    //         while (current > 0) {
+    //             // if(i === 1) tmp.push({hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1), position: arr.pop()});
+    //             // else if(i === 2) tmp.push({heal: Math.floor(Math.random() * 20 + 10), position: arr.pop()});
+    //             // else if(i === 3) tmp.push({attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), position: arr.pop()});
+    //             // else arr.pop();
+    //             if (i === 1) tmp.push({ hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1) });
+    //             else if (i === 2) tmp.push({ heal: Math.floor(Math.random() * 20 + 10) });
+    //             else if (i === 3) tmp.push({ attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5) });
+    //             else if (i === 4) this.setState({ boss: { hp: 2 * this.state.lvlDungeon, lvl: this.state.lvlDungeon, attack: 2 * this.state.lvlDungeon } })
+    //             current--;
+    //         }
+    //         if (i === 1) this.setState({ monsters: tmp });
+    //         if (i === 2) this.setState({ items: tmp });
+    //         if (i === 3) this.setState({ weapons: tmp });
+    //     }
 
-    }
+    // }
     
     // Get a random vacant location on the map
     getRandomPos(available) {
@@ -198,7 +117,7 @@ class Main extends React.Component {
     // To many states to handle at the same time?
     populateDungeon(available) {
         // var array = this.state.elements.slice();
-        // var occupied = [], current = 0, tmp = {};
+        var occupied = [], current = 0, tmp = {};
 
         var keys = Object.keys(totalEntities);
         console.log(keys.length);
@@ -206,19 +125,23 @@ class Main extends React.Component {
         for(var i = 0; i < keys.length; i++){
             // console.log(keys[i]);
             for(var y = 0; y < totalEntities[keys[i]]; y++){
-                var currentPos =  available.splice(Math.floor(Math.random() * available.length), 1);
-                if(keys[i] === "red") this.refs[currentPos].setEntity(keys[i]);
-                else if(keys[i] === "green") this.refs[currentPos].setEntity(keys[i]);
-                else if(keys[i] === "blue") this.refs[currentPos].setEntity(keys[i]);
-                else if(keys[i] === "yellow") this.refs[currentPos].setEntity(keys[i]);
-                else if(keys[i] === "purple") this.refs[currentPos].setEntity(keys[i]);
-                // console.log(keys[i]);
+                var pos =  available.splice(Math.floor(Math.random() * available.length), 1);
+                // this.refs[currentPos].setEntity(keys[i]);
+                // occupied.push(current);
+                if(keys[i] === "red"){
+                    this.refs[pos].setEntity(keys[i], 0, 0);             //player
+                    playerPosition = pos;
+                }
+                else if(keys[i] === "green") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 5),  Math.floor(Math.random() * dungeon + 5));      //monsters
+                else if(keys[i] === "blue") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 20),  Math.floor(Math.random() * dungeon + 10));       //boss
+                else if(keys[i] === "yellow") this.refs[pos].setEntity(keys[i], 0, Math.floor(Math.random() * dungeon + 3));     //weapons
+                else if(keys[i] === "purple") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 20), 0);     //items
             }
         }
-        for(var p = 0; p < 6000; p++){
-            if(this.refs[p].getVacancy() === "white") console.log("white");
+        // for(var p = 0; p < 6000; p++){
+        //     if(this.refs[p].getVacancy() === "white") console.log("white");
         
-        }
+        // }
 
         // console.log("Hello");
         // for (var i = 0; i < array.length; i++) {
@@ -259,7 +182,7 @@ class Main extends React.Component {
         var available = [];
 
         while (loop--) {
-            let sizeX = Math.floor(Math.random() * 15 + 1), sizeY = Math.floor(Math.random() * 15 + 1);
+            let sizeX = Math.floor(Math.random() * 12 + 1), sizeY = Math.floor(Math.random() * 12 + 1);
             let position = { column: Math.floor(Math.random() * (xLength - 15) + 2), row: Math.floor(Math.random() * (yLength - 15) + 2) }; // dont start around corners
             positionsArray.push(position);
             this.createRoom(position, sizeX, sizeY, available);
@@ -358,12 +281,12 @@ class Main extends React.Component {
     // Movement and interaction
     press = (event) => {
         event.preventDefault();
-        // console.log(this.state.playerPosition);
+        console.log(this.state.playerPosition);
         var key = event.which;
         var move = null;
         if (key === 37) {
             // console.log("left");
-            move = { posY: this.state.playerPosition.posY, posX: this.state.playerPosition.posX - 1 };
+            move = playerPosition--;
         } else if (key === 38) {
             // console.log("up");
             move = { posY: this.state.playerPosition.posY - 1, posX: this.state.playerPosition.posX };
@@ -375,19 +298,24 @@ class Main extends React.Component {
             move = { posY: this.state.playerPosition.posY + 1, posX: this.state.playerPosition.posX };
         }
 
-        if (move) {
-            // console.log(move);
-            // test whether the new cell is occupied
-            // console.log(this.state.dungeon[move.y][move.x]);
-            if (!this.state.dungeon[move.posY][move.posX][0]) {
-                // console.log("free willy");
-                this.entitiesInteraction(move);
-                if (!this.state.dungeon[move.posY][move.posX][6]) {
-                    this.updateMap(move, [false, true, false, false, false, false, true]);
-                }
-                // this.state.dungeon[move.y][move.x] = [false, true, false, false, false, false, true]
-            }
-        }
+        this.refs[move].setEntity("red");
+        this.refs[playerPosition].setEntity("white");
+        
+        
+        // this.setState({playerPosition: this.state.playerPosition-1});
+        // if (move) {
+        //     console.log(move);
+        //     // test whether the new cell is occupied
+        //     // console.log(this.state.dungeon[move.y][move.x]);
+        //     if (!this.state.dungeon[move.posY][move.posX][0]) {
+        //         // console.log("free willy");
+        //         this.entitiesInteraction(move);
+        //         if (!this.state.dungeon[move.posY][move.posX][6]) {
+        //             this.updateMap(move, [false, true, false, false, false, false, true]);
+        //         }
+        //         // this.state.dungeon[move.y][move.x] = [false, true, false, false, false, false, true]
+        //     }
+        // }
     }
 
 
@@ -399,7 +327,7 @@ class Main extends React.Component {
         // tmp[90] = <Wall f={false} />;
         // tmp[100] = <Wall f={false} />;
         // tmp[90].props.f = false;
-        while (len--) this.refs[len].setEntity("red");
+        while (len--) this.refs[len].fog();
         // this.cell.fog();
         // console.log(this.refs.c0.fog());
         console.log(this.refs[0]);
@@ -413,7 +341,7 @@ class Main extends React.Component {
         return (
             <div className="main" onKeyDown={this.press} tabIndex="0">
                 <div className="statuses">
-                    Health: {this.state.health} Level: {this.state.level} EXP: {this.state.exp} Weapon: {this.state.weapon} Dungeon: {this.state.lvlDungeon} <button onClick={this.change}>Toggle Darkness</button>
+                    Health: {health} Level: {level} EXP: {exp} Weapon: {weapon} Dungeon: {dungeon} <button onClick={this.change}>Toggle Darkness</button>
                 </div>
                 <div className="gameWindow">
 
