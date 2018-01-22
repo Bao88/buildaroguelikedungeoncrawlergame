@@ -66,9 +66,9 @@ class Main extends React.Component {
         }
     }
 
-    componentDidMount = () => {
-        this.setState({ dungeon: this.createMap(gRooms) });
-
+    componentDidMount(){
+        // this.updateFog(playerPosition);
+        this.createMap(gRooms);
     }
 
     // Creating rooms
@@ -130,7 +130,9 @@ class Main extends React.Component {
                 // occupied.push(current);
                 if(keys[i] === "red"){
                     this.refs[pos].setEntity(keys[i], 0, 0);             //player
+                    this.refs[pos].fog();
                     playerPosition = pos;
+                    
                 }
                 else if(keys[i] === "green") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 5),  Math.floor(Math.random() * dungeon + 5));      //monsters
                 else if(keys[i] === "blue") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 20),  Math.floor(Math.random() * dungeon + 10));       //boss
@@ -138,6 +140,7 @@ class Main extends React.Component {
                 else if(keys[i] === "purple") this.refs[pos].setEntity(keys[i], Math.floor(Math.random() * dungeon + 20), 0);     //items
             }
         }
+       
         // for(var p = 0; p < 6000; p++){
         //     if(this.refs[p].getVacancy() === "white") console.log("white");
         
@@ -192,27 +195,17 @@ class Main extends React.Component {
         // this.updateFog(this.state.playerPosition);
         // return map;
         this.populateDungeon(available);
+        // return map;
     };
 
     // update the area revealed
     updateFog = (position) => {
-        var tmp = this.state.dungeon;
-        // // console.log(position);
-        // // console.log(position);
-        tmp[position.posY - 2][position.posX][7] = false;
-        tmp[position.posY - 1][position.posX][7] = false;
-        tmp[position.posY + 1][position.posX][7] = false;
-        tmp[position.posY + 2][position.posX][7] = false;
-        tmp[position.posY][position.posX - 1][7] = false;
-        tmp[position.posY][position.posX + 1][7] = false;
-        tmp[position.posY][position.posX - 2][7] = false;
-        tmp[position.posY][position.posX + 2][7] = false;
-        tmp[position.posY - 1][position.posX - 1][7] = false;
-        tmp[position.posY - 1][position.posX + 1][7] = false;
-        tmp[position.posY + 1][position.posX + 1][7] = false;
-        tmp[position.posY + 1][position.posX - 1][7] = false;
+        this.refs[position-1].fog();
+        this.refs[position-1].fog();
+        this.refs[position-xLength].fog();
+        this.refs[position+xLength].fog();
 
-        this.setState({ dungeon: tmp });
+        // this.setState({ dungeon: tmp });
     }
 
     // Move the player around and update the entity we collide with
@@ -225,37 +218,27 @@ class Main extends React.Component {
         this.setState({ dungeon: tmp, playerPosition: position }, function () { this.updateFog(this.state.playerPosition); });
     }
 
+    // Interarctions of entities
     entitiesInteraction = (entity) => {
-        //    wall, player, monster, items, weapon, boss occupied
-        // 1: [false, false, true, false, false, false, true],
-        // 2: [false, false, false, true, false, false, true],
-        // 3: [false, false, false, false, true, false, true],
-        // 4: [false, false, false, false, false, true, true]
-        // console.log("monster " + this.state.monsters[0].position);
-        // console.log("items " + this.state.items[0].position);
-        // console.log("weapon " + this.state.weapons[0].position.posY);
-        // console.log("boss " + this.state.boss.hp + this.state.boss.lvl + this.state.boss.attack);
-
         var tmp = [], map = this.state.dungeon;
-        if (this.state.dungeon[entity.posY][entity.posX][2]) {
-
-            tmp = this.state.monsters[this.state.monsters.length - 1];
-            tmp.hp -= this.state.weapon;
-            this.setState({ health: this.state.health - tmp.lvl });
+        var type = this.refs[entity].checkEntity();
+        if(type === "green"){
+            console.log("monster");
+            // return;
             // dead monster
-            if (tmp.hp <= 0) {
+            if(tmp.hp <= 0){
                 this.state.monsters.pop();
                 this.setState({ exp: this.state.exp + tmp.lvl * Math.floor(Math.random() * 2 + 1) });
                 if (this.state.exp >= this.state.expcap) this.setState({ health: this.state.health + 10 * this.state.level, weapon: this.state.weapon + this.state.level, level: this.state.level + 1, exp: this.state.exp - this.state.expcap, expcap: this.state.expcap + this.state.lvlDungeon });
                 this.updateMap(entity, [false, true, false, false, false, false, true]);
             }
-        } else if (this.state.dungeon[entity.posY][entity.posX][3]) {
+        } else if(type === "green"){
             tmp = this.state.items.pop();
             this.setState({ health: this.state.health + tmp.heal });
-        } else if (this.state.dungeon[entity.posY][entity.posX][4]) {
+        } else if(type === "green"){
             tmp = this.state.weapons.pop();
             this.setState({ weapon: this.state.weapon + tmp.attack });
-        } else if (this.state.dungeon[entity.posY][entity.posX][5]) {
+        } else if(type === "green"){
             console.log("boss");
             tmp = this.state.boss;
             tmp.hp -= this.state.weapon;
@@ -274,34 +257,43 @@ class Main extends React.Component {
             }
         }
 
-        if (this.state.health <= 0) {
+        if (health <= 0) {
             this.resetMap(false);
         }
     }
     // Movement and interaction
     press = (event) => {
         event.preventDefault();
-        console.log(this.state.playerPosition);
+        // console.log(this.state.playerPosition);
         var key = event.which;
         var move = null;
         if (key === 37) {
             // console.log("left");
-            move = playerPosition--;
+            move = playerPosition-1;
         } else if (key === 38) {
             // console.log("up");
-            move = { posY: this.state.playerPosition.posY - 1, posX: this.state.playerPosition.posX };
+            move = playerPosition-xLength;
         } else if (key === 39) {
-            move = { posY: this.state.playerPosition.posY, posX: this.state.playerPosition.posX + 1 };
+            move = playerPosition + 1;
             // console.log("right");
         } else if (key === 40) {
             // console.log("down");
-            move = { posY: this.state.playerPosition.posY + 1, posX: this.state.playerPosition.posX };
+            move = playerPosition+xLength;
         }
 
-        this.refs[move].setEntity("red");
-        this.refs[playerPosition].setEntity("white");
         
-        
+        if(move && move < 6000){
+            // console.log(this.refs[move].checkEntity);
+            if(this.refs[move].checkEntity() !== "grey"){
+                // this.entitiesInteraction(move);
+                this.refs[move].setEntity("red");
+                this.refs[playerPosition].setEntity("white");
+                
+                playerPosition = move;
+                // this.updateFog(playerPosition);
+            }
+            
+        }
         // this.setState({playerPosition: this.state.playerPosition-1});
         // if (move) {
         //     console.log(move);
@@ -322,7 +314,7 @@ class Main extends React.Component {
     change = (event) => {
         // fog = !fog;
 
-        var tmp = this.state.dungeon, len = 100 * 60;
+        var len = 100 * 60;
         // while(len--) tmp[len] = len == 90 ? <Wall key={len} f={!this.state.fogs[len]} /> : <Wall key={len} f={this.state.fogs[len]} />;  
         // tmp[90] = <Wall f={false} />;
         // tmp[100] = <Wall f={false} />;
@@ -337,6 +329,7 @@ class Main extends React.Component {
         var cells = [], length = xLength * yLength;
         // console.log(length);
         while (length--) cells[length] = <Cell ref={length} key={length} />;
+        // this.createMap(gRooms);
         // this.setState({refArray: cells});
         return (
             <div className="main" onKeyDown={this.press} tabIndex="0">
@@ -368,3 +361,4 @@ class Main extends React.Component {
 }
 
 ReactDOM.render(<Main />, document.getElementById('root'));
+

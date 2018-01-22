@@ -13,7 +13,6 @@ export class Cell extends React.Component {
         };
     }
 
-
     getVacancy(){
         return this.state.entity;
     }
@@ -22,32 +21,20 @@ export class Cell extends React.Component {
         return this.state.entity;
     }
 
-
-    // //  if(keys[i] === "red") this.refs[pos].setEntity(keys[i]);             //player
-    // else if(keys[i] === "green") this.refs[pos].setEntity(keys[i]);      //monsters
-    // else if(keys[i] === "blue") this.refs[pos].setEntity(keys[i]);       //boss
-    // else if(keys[i] === "yellow") this.refs[pos].setEntity(keys[i]);     //weapons
-    // else if(keys[i] === "purple") this.refs[pos].setEntity(keys[i]);     //items
     setEntity(type, hp, att) {
-        // switch(type){
-        //     case "red": this.setState({ entity: type}); break;
-        //     // case "green": this.setState({ entity: type, health: hp, attack: att, level: lvl}); break;
-        //     // case "blue": this.setState({ entity: type, health: hp, attack: att, level: lvl}); break;
-        //     case "purple": this.setState({ entity: type, health: hp, attack: att}); break;
-        //     case "yellow": this.setState({ entity: type, health: hp, attack: att}); break;
-        //     default: this.setState({ entity: type, health: hp, attack: att}); break;
-        // }
         this.setState({entity: type, health: hp, attack: att});
     }
 
     fog() {
         this.setState({ fog: !this.state.fog });
     }
-    // shouldComponentUpdate(nextProps, nextState) {
-    //     return this.state.wall != nextState.wall;
-    // }
+
+    shouldComponentUpdate(prevProps, prevState){
+        return prevState !== this.state.fog;
+    }
+
     componentDidUpdate(){
-        console.log("Updated");
+        // console.log("Updated");
     }
 
     render() {
