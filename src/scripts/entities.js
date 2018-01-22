@@ -26,7 +26,8 @@ export class Cell extends React.Component {
     }
 
     fog() {
-        this.setState({ fog: !this.state.fog });
+        if(this.state.entity === "red");
+        else if(this.state.fog) this.setState({ fog: !this.state.fog });
     }
 
     shouldComponentUpdate(prevProps, prevState){

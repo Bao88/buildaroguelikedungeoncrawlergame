@@ -5,7 +5,7 @@ import './css/index.css';
 import { Cell } from "./scripts/entities";
 
 // Game Configurations
-var gRooms = 10;
+var gRooms = 10, cells = [];
 // var fog = true;
 var yLength = 60, xLength = 100;
 var totalEntities = {
@@ -23,7 +23,9 @@ var health = 50, level = 1, exp = 0, weapon = 5, dungeon = 1;
 
 // Should optimize the program, takes too much CPU resources
 class Main extends React.Component {
-
+    state = {
+        dungeon: []
+    }
     resetMap = (bool) => {
         if (this.state.lvlDungeon === 20) {
             this.setState(this.Initialstate, function validate() {
@@ -66,11 +68,7 @@ class Main extends React.Component {
         }
     }
 
-    componentDidMount(){
-        // this.updateFog(playerPosition);
-        this.createMap(gRooms);
-    }
-
+   
     // Creating rooms
     createRoom(position, sizeX, sizeY, available) {
         // this.refs[xLength * (position.row) + (position.column)].setEntity("white");
@@ -192,17 +190,19 @@ class Main extends React.Component {
         }
         while (rooms-- !== 1) this.createRoad(positionsArray[rooms], positionsArray[rooms - 1], available);
         // console.log("Hello 1");
-        // this.updateFog(this.state.playerPosition);
+        
         // return map;
         this.populateDungeon(available);
+        // this.updateFog(this.state.playerPosition);
         // return map;
     };
 
     // update the area revealed
-    updateFog = (position) => {
-        this.refs[position-1].fog();
+    updateFog(){
+        var position = parseInt(playerPosition, 10);
         this.refs[position-1].fog();
         this.refs[position-xLength].fog();
+        this.refs[position+1].fog();
         this.refs[position+xLength].fog();
 
         // this.setState({ dungeon: tmp });
@@ -264,72 +264,70 @@ class Main extends React.Component {
     // Movement and interaction
     press = (event) => {
         event.preventDefault();
-        // console.log(this.state.playerPosition);
+        var position = parseInt(playerPosition, 10);
+        // console.log(React.Children.count(this.props.children));
         var key = event.which;
         var move = null;
         if (key === 37) {
             // console.log("left");
-            move = playerPosition-1;
+            move = position-1;
         } else if (key === 38) {
             // console.log("up");
-            move = playerPosition-xLength;
+            move = position-xLength;
         } else if (key === 39) {
-            move = playerPosition + 1;
+            move = position + 1;
             // console.log("right");
         } else if (key === 40) {
             // console.log("down");
-            move = playerPosition+xLength;
+            move = position+xLength;
         }
 
         
-        if(move && move < 6000){
+        if(move){
             // console.log(this.refs[move].checkEntity);
             if(this.refs[move].checkEntity() !== "grey"){
                 // this.entitiesInteraction(move);
                 this.refs[move].setEntity("red");
                 this.refs[playerPosition].setEntity("white");
-                
+
                 playerPosition = move;
-                // this.updateFog(playerPosition);
+
+                this.updateFog();
             }
-            
         }
-        // this.setState({playerPosition: this.state.playerPosition-1});
-        // if (move) {
-        //     console.log(move);
-        //     // test whether the new cell is occupied
-        //     // console.log(this.state.dungeon[move.y][move.x]);
-        //     if (!this.state.dungeon[move.posY][move.posX][0]) {
-        //         // console.log("free willy");
-        //         this.entitiesInteraction(move);
-        //         if (!this.state.dungeon[move.posY][move.posX][6]) {
-        //             this.updateMap(move, [false, true, false, false, false, false, true]);
-        //         }
-        //         // this.state.dungeon[move.y][move.x] = [false, true, false, false, false, false, true]
-        //     }
-        // }
     }
 
 
     change = (event) => {
-        // fog = !fog;
-
         var len = 100 * 60;
-        // while(len--) tmp[len] = len == 90 ? <Wall key={len} f={!this.state.fogs[len]} /> : <Wall key={len} f={this.state.fogs[len]} />;  
-        // tmp[90] = <Wall f={false} />;
-        // tmp[100] = <Wall f={false} />;
-        // tmp[90].props.f = false;
         while (len--) this.refs[len].fog();
-        // this.cell.fog();
-        // console.log(this.refs.c0.fog());
-        console.log(this.refs[0]);
+    }
+
+    renderCreate(map){
+        
+    }
+
+    componentDidMount(){
+        // this.updateFog(playerPosition);
+        
+        this.setState({dungeon: cells});
+        console.log(this.refs);
+    }
+
+    componentDidUpdate(){
+        console.log("updated");
+        this.createMap(gRooms);
+        // console.log(playerPosition);
+        // console.log(playerPosition+1);
+        // console.log(this.refs[playerPosition+1]);
+        // console.log(this.refs[playerPosition+1].fog());
+        this.updateFog();
     }
 
     render() {
-        var cells = [], length = xLength * yLength;
+        var length = xLength*yLength;
         // console.log(length);
         while (length--) cells[length] = <Cell ref={length} key={length} />;
-        // this.createMap(gRooms);
         // this.setState({refArray: cells});
         return (
             <div className="main" onKeyDown={this.press} tabIndex="0">
