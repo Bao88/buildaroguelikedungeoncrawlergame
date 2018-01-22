@@ -1,55 +1,72 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './css/index.css';
+import { Monster, Items, Weapons, Player, Boss, Wall, Road } from "./scripts/entities";
 
-    class Fog extends React.Component {
-        render() {
-            // console.log("Render");
-            return (
-                <div className="fog" style={{zIndex: 1}}></div>
-            );
-        }
-    }
-class Cell extends React.Component{
-    constructor(props){
+class Cell extends React.Component {
+    constructor(props) {
         super(props);
 
         this.state = {
-            x: props.x,
-            y: props.y,
-            wall: true,
-            player: false,
-            monster: false,
-            items: false,
-            weapon: false,
-            boss: false,
-            occupied: false,
-            fog: this.props.arr[7]
+            entity: "grey",
+            health: null,
+            attack: null,
+            level: null,
+            exp: null,
+            fog: true
         };
     }
 
-    change = (event) => {
-        this.setState({wall: !this.state.wall});
+
+    getVacancy(){
+        return this.state.entity;
     }
 
+    checkEntity() {
+        return this.state.entity;
+    }
+
+    setEntity(type) {
+        this.setState({ entity: type });
+    }
+
+    change = (event) => {
+        this.setState({ wall: !this.state.wall });
+    }
+
+    fog() {
+        this.setState({ fog: !this.state.fog });
+    }
     // shouldComponentUpdate(nextProps, nextState) {
     //     return this.state.wall != nextState.wall;
     // }
 
-render() {
+
+    render() {
         return (
-            <div id={this.props.id} onClick={this.change} className="cell" style={{backgroundColor: this.state.fog ? "black" : this.props.arr[0] ? "grey" : (this.props.arr[1] ? "red": (this.props.arr[2] ? "green": (this.props.arr[3] ? "purple": (this.props.arr[4] ? "yellow" : (this.props.arr[5] ? "blue":"white")))))}}>
+            <div id={this.props.id} onClick={this.change} className="cell" style={{ backgroundColor: this.state.entity }}>
 
             </div>
         )
     };
 }
 
+// Game Configurations
 var gRooms = 10;
-var fog = false;
+var fog = true;
+var yLength = 60, xLength = 100;
+var totalEntities = {
+    "red": 1,      //player
+    "green": 5,    //monsters
+    "purple": 3,       //items
+    "yellow": 1,     //weapons
+    "blue": 1         //boss
+};
+var expcap = 10;
+
 // Should optimize the program, takes too much CPU resources
 class Main extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = this.Initialstate;
@@ -57,17 +74,12 @@ class Main extends React.Component {
     }
 
     get Initialstate() {
-        var cells = [], cell = [], xLen = 100, yLen = 60;
-        // var fogs = [], fog = [];
-        while(yLen--){
-            while(xLen--){
-                cell[xLen] = [true, false, false, false, false, false, true, fog];
-                // fog[xLen] = false;
-            }
-            cells[yLen] = cell.slice();
-            // fogs[yLen] = fog.slice();
-            xLen = 100;
-        }
+        var cells = [], fogofwar = [], length = xLength * yLength;
+        // while(length--) refArray = "c";   length = xLength * yLength;
+        while (length--) fogofwar[length] = true; length = xLength * yLength;
+
+        // refArray[0] = "a";
+        // cells[0] = <Wall ref={component => {this["cell${0}"] = component}} key={length} f={fogofwar[0]}/>;
 
         return {
             health: 100,
@@ -77,55 +89,56 @@ class Main extends React.Component {
             expcap: 10,
             board: cells,
             emptyBoard: cells.slice(),
-            dungeon: cells.slice(),
-            // fogofwar: fogs.slice(),
+            dungeon: cells,
+            fogs: fogofwar,
             elements: [1, 5, 5, 1, 1],
             x: 100,
             y: 60,
-            playerPosition: {x: 0, y: 0},
+            playerPosition: { x: 0, y: 0 },
             monsters: [],
             items: [],
             weapons: [],
-            boss: {hp: 100, lvl: 1, attack: 5},
+            boss: { hp: 100, lvl: 1, attack: 5 },
             lvlDungeon: 1,
-            tfog: fog
+            fog: true,
+            refArray: []
         };
     }
 
     resetMap = (bool) => {
-        if(this.state.lvlDungeon === 20){
-            this.setState(this.Initialstate, function validate(){
-                this.setState({dungeon: this.createMap(10)}, this.showMessage(true, true));
+        if (this.state.lvlDungeon === 20) {
+            this.setState(this.Initialstate, function validate() {
+                this.setState({ dungeon: this.createMap(10) }, this.showMessage(true, true));
             });
         } else
-        if(bool){
-            // Won
-            var hp = this.state.health, lvl = this.state.level, xp = this.state.exp, ecap = this.state.expcap, wp = this.state.weapon, dlvl = this.state.lvlDungeon;
-            this.setState(this.Initialstate, function validate(){
-                this.setState({
-                    dungeon: this.createMap(gRooms++),
-                    health: hp,
-                    level: lvl,
-                    exp: xp,
-                    expcap: ecap,
-                    weapon: wp,
-                    lvlDungeon: dlvl + 1
+            if (bool) {
+                // Won
+                var hp = this.state.health, lvl = this.state.level, xp = this.state.exp, ecap = this.state.expcap, wp = this.state.weapon, dlvl = this.state.lvlDungeon;
+                this.setState(this.Initialstate, function validate() {
+                    this.setState({
+                        dungeon: this.createMap(gRooms++),
+                        health: hp,
+                        level: lvl,
+                        exp: xp,
+                        expcap: ecap,
+                        weapon: wp,
+                        lvlDungeon: dlvl + 1
+                    });
                 });
-            });
-            this.showMessage(true, false);
-        } else {
-            // Dead, Dark souls difficulty, you start at dungeon level 1 again peasant!
-            // var hp = this.state.health, lvl = this.state.level, wp = this.state.weapon, dlvl = this.state.lvlDungeon;
-            this.setState(this.Initialstate, function validate(){
-                this.setState({dungeon: this.createMap(10)}, this.showMessage(false, false));
-            });
-        }
+                this.showMessage(true, false);
+            } else {
+                // Dead, Dark souls difficulty, you start at dungeon level 1 again peasant!
+                // var hp = this.state.health, lvl = this.state.level, wp = this.state.weapon, dlvl = this.state.lvlDungeon;
+                this.setState(this.Initialstate, function validate() {
+                    this.setState({ dungeon: this.createMap(10) }, this.showMessage(false, false));
+                });
+            }
     }
 
     showMessage = (bool, won) => {
-        if(bool && won){
+        if (bool && won) {
             console.log("Won the game");
-        } else if(bool){
+        } else if (bool) {
             console.log("Won dungeon");
             gRooms++;
         } else {
@@ -135,118 +148,127 @@ class Main extends React.Component {
     }
 
     componentDidMount = () => {
-        this.setState({dungeon: this.createMap(gRooms++)});
+        this.setState({ dungeon: this.createMap(gRooms) });
 
     }
-    createRoom(map, position, sizeX, sizeY){
-        map[position.y][position.x] = [false, false, false, false, false, false, false, this.state.tfog];
 
-        for(var x = 0; x <= sizeX; x++){
-            map[position.y][position.x+x] = [false, false, false, false, false, false, false, this.state.tfog];
-            for(var y = 0; y <= sizeY; y++){
-                map[position.y+y][position.x+x] = [false, false, false, false, false, false, false, this.state.tfog];
+    // Creating rooms
+    createRoom(position, sizeX, sizeY, available) {
+        // this.refs[xLength * (position.row) + (position.column)].setEntity("white");
+        for (var x = 0; x <= sizeX; x++) {
+            for (var y = 0; y <= sizeY; y++) {
+                this.refs[xLength * (position.row + x) + (position.column + y)].setEntity("white");
+                available.push(xLength * (position.row + x) + (position.column + y));
             }
         }
-
-        return map;
     }
 
-    getRandomPos(map){
-        var pos = {}, x = 0, y = 0;
-        while(true){
-            x = Math.floor(Math.random() * this.state.x);
-            y = Math.floor(Math.random() * this.state.y);
-            if(!map[y][x][0]){
-                pos = {posY: y, posX: x}
-                break;
-            }
-        }
-        return pos;
-    }
-
-    // Monsters i = 1, items i = 2 and weapons i = 3
-        createEntities = () => {
-            var array = this.state.elements.slice();
-            var current = 0;
-            for(var i = 1; i < array.length; i++){
-                var tmp = [];
-                current = array[i];
-                // console.log(current);
-                while(current > 0){
-                    // if(i === 1) tmp.push({hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1), position: arr.pop()});
-                    // else if(i === 2) tmp.push({heal: Math.floor(Math.random() * 20 + 10), position: arr.pop()});
-                    // else if(i === 3) tmp.push({attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), position: arr.pop()});
-                    // else arr.pop();
-                    if(i === 1) tmp.push({hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1)});
-                    else if(i === 2) tmp.push({heal: Math.floor(Math.random() * 20 + 10)});
-                    else if(i === 3) tmp.push({attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5)});
-                    else if(i === 4) this.setState({boss: {hp: 2*this.state.lvlDungeon, lvl: this.state.lvlDungeon, attack: 2*this.state.lvlDungeon}})
-                    current--;
-                }
-                if(i === 1) this.setState({monsters: tmp});
-                if(i === 2) this.setState({items: tmp});
-                if(i === 3) this.setState({weapons: tmp});
-            }
-            
-        }
-    // myPosition = {};
-    // To many states to handle at the same time?
-    populateDungeon(map){
+    
+    createEntities = () => {
         var array = this.state.elements.slice();
-        var occupied = [], current = 0, tmp = {};
-        var elem = {
-            0: [false, true, false, false, false, false, true, false], //player
-            1: [false, false, true, false, false, false, true, this.state.tfog], //monster
-            2: [false, false, false, true, false, false, false, this.state.tfog], //items
-            3: [false, false, false, false, true, false, false, this.state.tfog], //weapons
-            4: [false, false, false, false, false, true, true, this.state.tfog]  //boss
-        };
-
-        for(var i = 0; i < array.length; i++){
+        var current = 0;
+        for (var i = 1; i < array.length; i++) {
+            var tmp = [];
             current = array[i];
-            while(current > 0){
-                tmp = this.getRandomPos(map);
-                if(!occupied.includes(tmp)){
-                    occupied.push(tmp);
-                    map[tmp.posY][tmp.posX] = elem[i];
-                    if(i === 0) this.setState({playerPosition: tmp}, function(){this.updateFog(this.state.playerPosition);});
-                    current--;
-                }
+            // console.log(current);
+            while (current > 0) {
+                // if(i === 1) tmp.push({hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1), position: arr.pop()});
+                // else if(i === 2) tmp.push({heal: Math.floor(Math.random() * 20 + 10), position: arr.pop()});
+                // else if(i === 3) tmp.push({attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), position: arr.pop()});
+                // else arr.pop();
+                if (i === 1) tmp.push({ hp: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5), lvl: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 1) });
+                else if (i === 2) tmp.push({ heal: Math.floor(Math.random() * 20 + 10) });
+                else if (i === 3) tmp.push({ attack: Math.floor(Math.random() * (10 * this.state.lvlDungeon) + 5) });
+                else if (i === 4) this.setState({ boss: { hp: 2 * this.state.lvlDungeon, lvl: this.state.lvlDungeon, attack: 2 * this.state.lvlDungeon } })
+                current--;
+            }
+            if (i === 1) this.setState({ monsters: tmp });
+            if (i === 2) this.setState({ items: tmp });
+            if (i === 3) this.setState({ weapons: tmp });
+        }
+
+    }
+    
+    // Get a random vacant location on the map
+    getRandomPos(available) {
+        return available.splice(Math.floor(Math.random() * available.length), 1);
+    }
+
+
+    // To many states to handle at the same time?
+    populateDungeon(available) {
+        // var array = this.state.elements.slice();
+        // var occupied = [], current = 0, tmp = {};
+
+        var keys = Object.keys(totalEntities);
+        console.log(keys.length);
+
+        for(var i = 0; i < keys.length; i++){
+            // console.log(keys[i]);
+            for(var y = 0; y < totalEntities[keys[i]]; y++){
+                var currentPos =  available.splice(Math.floor(Math.random() * available.length), 1);
+                if(keys[i] === "red") this.refs[currentPos].setEntity(keys[i]);
+                else if(keys[i] === "green") this.refs[currentPos].setEntity(keys[i]);
+                else if(keys[i] === "blue") this.refs[currentPos].setEntity(keys[i]);
+                else if(keys[i] === "yellow") this.refs[currentPos].setEntity(keys[i]);
+                else if(keys[i] === "purple") this.refs[currentPos].setEntity(keys[i]);
+                // console.log(keys[i]);
             }
         }
-        this.createEntities(occupied);
-    }
-    // Create bindings/tunnels to each room
-    createRoad(map, position1, position2){
-        var x1 = position1.x, x2 = position2.x;
-        var y1 = position1.y, y2 = position2.y;
+        for(var p = 0; p < 6000; p++){
+            if(this.refs[p].getVacancy() === "white") console.log("white");
+        
+        }
 
-        while(x1 !== x2){
-            map[position1.y][x1] = [false, false, false, false, false, false, false, this.state.tfog];
+        // console.log("Hello");
+        // for (var i = 0; i < array.length; i++) {
+        //     current = array[i];
+        //     while (current > 0) {
+        //         tmp = this.getRandomPos();
+        //         if (!occupied.includes(tmp)) {
+        //             occupied.push(tmp);
+        //             map[tmp.posY][tmp.posX] = elem[i];
+        //             if (i === 0) this.setState({ playerPosition: tmp }, function () { this.updateFog(this.state.playerPosition); });
+        //             current--;
+        //         }
+        //     }
+        // }
+        // this.createEntities(occupied);
+    }
+
+    // Create bindings/tunnels to each room
+    createRoad(room1, room2, available) {
+        var x1 = room1.column, x2 = room2.column;
+        var y1 = room1.row, y2 = room2.row;
+        while (x1 !== x2) {
+            this.refs[xLength * room1.row + x1].setEntity("white");
+            available.push(xLength * room1.row + x1);
             x1 = x1 < x2 ? x1 + 1 : x1 - 1;
         }
 
-        while(y1 !== y2){
-            map[y1][position2.x] = [false, false, false, false, false, false, false, this.state.tfog];
+        while (y1 !== y2) {
+            this.refs[xLength * y1 + room2.column].setEntity("white");
+            available.push(xLength * y1 + room2.column);
             y1 = y1 < y2 ? y1 + 1 : y1 - 1;
         }
     }
 
     // Create rooms
     createMap(rooms) {
-        let map = this.state.emptyBoard.slice();
         let positionsArray = [], loop = rooms;
+        var available = [];
 
-        while(loop--){
+        while (loop--) {
             let sizeX = Math.floor(Math.random() * 15 + 1), sizeY = Math.floor(Math.random() * 15 + 1);
-            let position = {x: Math.floor(Math.random() * 84 + 2), y: Math.floor(Math.random() * 43 + 2)}; // dont start around corners
+            let position = { column: Math.floor(Math.random() * (xLength - 15) + 2), row: Math.floor(Math.random() * (yLength - 15) + 2) }; // dont start around corners
             positionsArray.push(position);
-            this.createRoom(map, position, sizeX, sizeY);
+            this.createRoom(position, sizeX, sizeY, available);
         }
-        while(rooms-- !== 1) this.createRoad(map, positionsArray[rooms], positionsArray[rooms-1]);
-        this.populateDungeon(map);
+        while (rooms-- !== 1) this.createRoad(positionsArray[rooms], positionsArray[rooms - 1], available);
+        // console.log("Hello 1");
         // this.updateFog(this.state.playerPosition);
-        return map;
+        // return map;
+        this.populateDungeon(available);
     };
 
     // update the area revealed
@@ -254,20 +276,20 @@ class Main extends React.Component {
         var tmp = this.state.dungeon;
         // // console.log(position);
         // // console.log(position);
-        tmp[position.posY-2][position.posX][7] = false;
-        tmp[position.posY-1][position.posX][7] = false;
-        tmp[position.posY+1][position.posX][7] = false;
-        tmp[position.posY+2][position.posX][7] = false;
-        tmp[position.posY][position.posX-1][7] = false;
-        tmp[position.posY][position.posX+1][7] = false;
-        tmp[position.posY][position.posX-2][7] = false;
-        tmp[position.posY][position.posX+2][7] = false;
-        tmp[position.posY-1][position.posX-1][7] = false;
-        tmp[position.posY-1][position.posX+1][7] = false;
-        tmp[position.posY+1][position.posX+1][7] = false;
-        tmp[position.posY+1][position.posX-1][7] = false;
+        tmp[position.posY - 2][position.posX][7] = false;
+        tmp[position.posY - 1][position.posX][7] = false;
+        tmp[position.posY + 1][position.posX][7] = false;
+        tmp[position.posY + 2][position.posX][7] = false;
+        tmp[position.posY][position.posX - 1][7] = false;
+        tmp[position.posY][position.posX + 1][7] = false;
+        tmp[position.posY][position.posX - 2][7] = false;
+        tmp[position.posY][position.posX + 2][7] = false;
+        tmp[position.posY - 1][position.posX - 1][7] = false;
+        tmp[position.posY - 1][position.posX + 1][7] = false;
+        tmp[position.posY + 1][position.posX + 1][7] = false;
+        tmp[position.posY + 1][position.posX - 1][7] = false;
 
-        this.setState({dungeon: tmp});
+        this.setState({ dungeon: tmp });
     }
 
     // Move the player around and update the entity we collide with
@@ -276,8 +298,8 @@ class Main extends React.Component {
         var player = this.state.playerPosition;
         tmp[player.posY][player.posX] = [false, false, false, false, false, false, false, this.state.fog];
         tmp[position.posY][position.posX] = state;
-        
-        this.setState({dungeon: tmp, playerPosition: position}, function(){this.updateFog(this.state.playerPosition);});
+
+        this.setState({ dungeon: tmp, playerPosition: position }, function () { this.updateFog(this.state.playerPosition); });
     }
 
     entitiesInteraction = (entity) => {
@@ -292,36 +314,36 @@ class Main extends React.Component {
         // console.log("boss " + this.state.boss.hp + this.state.boss.lvl + this.state.boss.attack);
 
         var tmp = [], map = this.state.dungeon;
-        if(this.state.dungeon[entity.posY][entity.posX][2]){
-            
-            tmp = this.state.monsters[this.state.monsters.length-1];
+        if (this.state.dungeon[entity.posY][entity.posX][2]) {
+
+            tmp = this.state.monsters[this.state.monsters.length - 1];
             tmp.hp -= this.state.weapon;
-            this.setState({health: this.state.health - tmp.lvl});
+            this.setState({ health: this.state.health - tmp.lvl });
             // dead monster
-            if(tmp.hp <= 0){
+            if (tmp.hp <= 0) {
                 this.state.monsters.pop();
-                this.setState({exp: this.state.exp + tmp.lvl * Math.floor(Math.random()*2 + 1)});
-                if(this.state.exp >= this.state.expcap) this.setState({health: this.state.health + 10*this.state.level, weapon: this.state.weapon + this.state.level, level: this.state.level+1, exp: this.state.exp-this.state.expcap, expcap: this.state.expcap + this.state.lvlDungeon});
+                this.setState({ exp: this.state.exp + tmp.lvl * Math.floor(Math.random() * 2 + 1) });
+                if (this.state.exp >= this.state.expcap) this.setState({ health: this.state.health + 10 * this.state.level, weapon: this.state.weapon + this.state.level, level: this.state.level + 1, exp: this.state.exp - this.state.expcap, expcap: this.state.expcap + this.state.lvlDungeon });
                 this.updateMap(entity, [false, true, false, false, false, false, true]);
             }
-        } else if(this.state.dungeon[entity.posY][entity.posX][3]){
+        } else if (this.state.dungeon[entity.posY][entity.posX][3]) {
             tmp = this.state.items.pop();
-            this.setState({health: this.state.health + tmp.heal});
-        } else if(this.state.dungeon[entity.posY][entity.posX][4]){
+            this.setState({ health: this.state.health + tmp.heal });
+        } else if (this.state.dungeon[entity.posY][entity.posX][4]) {
             tmp = this.state.weapons.pop();
-            this.setState({weapon: this.state.weapon + tmp.attack});
-        } else if(this.state.dungeon[entity.posY][entity.posX][5]){
+            this.setState({ weapon: this.state.weapon + tmp.attack });
+        } else if (this.state.dungeon[entity.posY][entity.posX][5]) {
             console.log("boss");
             tmp = this.state.boss;
             tmp.hp -= this.state.weapon;
-            this.setState({health: this.state.health - tmp.lvl*tmp.attack});
+            this.setState({ health: this.state.health - tmp.lvl * tmp.attack });
             // dead monster
-            if(tmp.hp <= 0){
-                this.setState({exp: this.state.exp + tmp.lvl * Math.floor(Math.random()*5 + 5)});
-                if(this.state.exp >= this.state.expcap) this.setState({health: this.state.health + 10*this.state.level, weapon: this.state.weapon + this.state.level, level: this.state.level+1, exp: this.state.exp-this.state.expcap, expcap: this.state.expcap + this.state.lvlDungeon},
-                    function(){
+            if (tmp.hp <= 0) {
+                this.setState({ exp: this.state.exp + tmp.lvl * Math.floor(Math.random() * 5 + 5) });
+                if (this.state.exp >= this.state.expcap) this.setState({ health: this.state.health + 10 * this.state.level, weapon: this.state.weapon + this.state.level, level: this.state.level + 1, exp: this.state.exp - this.state.expcap, expcap: this.state.expcap + this.state.lvlDungeon },
+                    function () {
                         // this.updateMap(entity, [false, true, false, false, false, false, true]);
-                        if(this.state.health > 0){
+                        if (this.state.health > 0) {
                             this.resetMap(true);
                         }
                     }
@@ -329,38 +351,38 @@ class Main extends React.Component {
             }
         }
 
-        if(this.state.health <= 0){
+        if (this.state.health <= 0) {
             this.resetMap(false);
         }
     }
-// Movement and interaction
+    // Movement and interaction
     press = (event) => {
         event.preventDefault();
         // console.log(this.state.playerPosition);
         var key = event.which;
         var move = null;
-        if(key === 37){
+        if (key === 37) {
             // console.log("left");
-            move = {posY: this.state.playerPosition.posY, posX: this.state.playerPosition.posX-1};
-        } else if(key === 38){
+            move = { posY: this.state.playerPosition.posY, posX: this.state.playerPosition.posX - 1 };
+        } else if (key === 38) {
             // console.log("up");
-            move = {posY: this.state.playerPosition.posY-1, posX: this.state.playerPosition.posX};
-        } else if(key === 39){
-            move = {posY: this.state.playerPosition.posY, posX: this.state.playerPosition.posX+1};
+            move = { posY: this.state.playerPosition.posY - 1, posX: this.state.playerPosition.posX };
+        } else if (key === 39) {
+            move = { posY: this.state.playerPosition.posY, posX: this.state.playerPosition.posX + 1 };
             // console.log("right");
-        } else if(key === 40){
+        } else if (key === 40) {
             // console.log("down");
-            move = {posY: this.state.playerPosition.posY+1, posX: this.state.playerPosition.posX};
+            move = { posY: this.state.playerPosition.posY + 1, posX: this.state.playerPosition.posX };
         }
 
-        if(move){
+        if (move) {
             // console.log(move);
             // test whether the new cell is occupied
             // console.log(this.state.dungeon[move.y][move.x]);
-            if(!this.state.dungeon[move.posY][move.posX][0]){
+            if (!this.state.dungeon[move.posY][move.posX][0]) {
                 // console.log("free willy");
                 this.entitiesInteraction(move);
-                if(!this.state.dungeon[move.posY][move.posX][6]){
+                if (!this.state.dungeon[move.posY][move.posX][6]) {
                     this.updateMap(move, [false, true, false, false, false, false, true]);
                 }
                 // this.state.dungeon[move.y][move.x] = [false, true, false, false, false, false, true]
@@ -368,32 +390,48 @@ class Main extends React.Component {
         }
     }
 
+
     change = (event) => {
-        fog = !fog;
-        var tmp = this.state.dungeon;
-        for(var x = 0; x < tmp.length; x++){
-            for(var y = 0; y < tmp[x].length; y++){
-                tmp[x][y][7] = !fog;
-            }
-        }
-        this.setState({dungeon: tmp}, function() {this.updateFog(this.state.playerPosition);});
+        // fog = !fog;
+
+        var tmp = this.state.dungeon, len = 100 * 60;
+        // while(len--) tmp[len] = len == 90 ? <Wall key={len} f={!this.state.fogs[len]} /> : <Wall key={len} f={this.state.fogs[len]} />;  
+        // tmp[90] = <Wall f={false} />;
+        // tmp[100] = <Wall f={false} />;
+        // tmp[90].props.f = false;
+        while (len--) this.refs[len].setEntity("red");
+        // this.cell.fog();
+        // console.log(this.refs.c0.fog());
+        console.log(this.refs[0]);
     }
-    render(){
+
+    render() {
+        var cells = [], length = xLength * yLength;
+        // console.log(length);
+        while (length--) cells[length] = <Cell ref={length} key={length} />;
+        // this.setState({refArray: cells});
         return (
             <div className="main" onKeyDown={this.press} tabIndex="0">
                 <div className="statuses">
                     Health: {this.state.health} Level: {this.state.level} EXP: {this.state.exp} Weapon: {this.state.weapon} Dungeon: {this.state.lvlDungeon} <button onClick={this.change}>Toggle Darkness</button>
                 </div>
                 <div className="gameWindow">
-                        
+
                     <div className="game">
-                        {
+                        {cells}
+                        {/* <Monster />
+                        <Items />
+                        <Weapons />
+                        <Player />
+                        <Boss />
+                        <Wall /> */}
+                        {/* {
                            this.state.dungeon.map((value, index) => (
                                 this.state.dungeon[index].map((value, inx) => (
                                         <Cell key={index + "," + inx} x={index} y={inx} id={"x: " +index + " y: " + inx} arr={value}/>
                                 ), this)
                             ), this)
-                        }
+                        } */}
                     </div>
                 </div>
             </div>
